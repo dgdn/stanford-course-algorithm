@@ -1,3 +1,3 @@
 # stanford-course-algorithm
 
-### algorithm implement in golang
+#### algorithm implement in golang
