@@ -14,15 +14,21 @@ func main() {
 func mergeSort(arr []int) []int {
 	n := len(arr)
 
+	//base case
 	if n == 1 {
 		return arr
 	}
 
+	//divide
 	mid := n / 2
+	left := arr[:mid]
+	right := arr[mid:]
 
-	sortedLeft := mergeSort(arr[:mid])
-	sortedRight := mergeSort(arr[mid:])
+	//conqur
+	sortedLeft := mergeSort(left)
+	sortedRight := mergeSort(right)
 
+	//combine
 	return merge(sortedLeft, sortedRight)
 }
 
