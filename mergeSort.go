@@ -36,15 +36,17 @@ func merge(left, right []int) []int {
 	for idx := 0; idx < n; idx++ {
 
 		if i == len(left) {
-			out[idx] = right[j]
-			j++
-			continue
+			for k := 0; k < len(right)-j; k++ {
+				out[idx+k] = right[j+k]
+			}
+			break
 		}
 
 		if j == len(right) {
-			out[idx] = left[i]
-			i++
-			continue
+			for k := 0; k < len(left)-i; k++ {
+				out[idx+k] = left[i+k]
+			}
+			break
 		}
 
 		if left[i] >= right[j] {
