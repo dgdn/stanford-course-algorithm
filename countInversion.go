@@ -1,10 +1,31 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
 
 func main() {
-	l, n := sort_and_split([]int{1, 3, 5, 7, 9, 2, 4, 6, 8})
-	fmt.Println(l, n)
+
+	//txt file from the course assignment containing 10,00000 integers
+	f, err := os.Open("count_inversion.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	var datas []int
+	for scanner.Scan() {
+		d, _ := strconv.Atoi(scanner.Text())
+		datas = append(datas, d)
+	}
+
+	_, n := sort_and_split(datas)
+	fmt.Println(n)
+	//output correct answer 2407905288
 }
 
 func sort_and_split(data []int) ([]int, int) {
