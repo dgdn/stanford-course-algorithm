@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+var total int
+
 func main() {
 
 	f, err := os.Open("quick_sort_data.txt")
@@ -22,10 +24,12 @@ func main() {
 		datas = append(datas, d)
 	}
 	quickSort(datas)
-	fmt.Println(datas)
+	fmt.Println(total, "comparisons")
 }
 
 func quickSort(a []int) {
+
+	total += len(a) - 1
 
 	//base case
 	if len(a) == 1 {
@@ -47,7 +51,44 @@ func quickSort(a []int) {
 	}
 }
 
+//implement first-median-last choosing pivot algorithm
 func choosePivot(a []int) int {
+	first := a[0]
+
+	var middle int
+	var middlePosition int
+	if len(a)%2 == 0 {
+		middlePosition = len(a)/2 - 1
+		middle = a[middlePosition]
+	} else {
+		middlePosition = len(a) / 2
+		middle = a[middlePosition]
+	}
+
+	last := a[len(a)-1]
+
+	if last < first && first < middle {
+		return 0
+	}
+	if middle < first && first < last {
+		return 0
+	}
+
+	if first < middle && middle < last {
+		return middlePosition
+	}
+
+	if last < middle && middle < first {
+		return middlePosition
+	}
+
+	if first < last && last < middle {
+		return len(a) - 1
+	}
+	if middle < last && last < first {
+		return len(a) - 1
+	}
+
 	return 0
 }
 
