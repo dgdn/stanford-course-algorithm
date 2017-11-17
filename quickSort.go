@@ -1,11 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
 
 func main() {
-	a := []int{3, 8, 2, 5, 1, 4, 7, 6}
-	quickSort(a)
-	fmt.Println(a)
+
+	f, err := os.Open("quick_sort_data.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	var datas []int
+	for scanner.Scan() {
+		d, _ := strconv.Atoi(scanner.Text())
+		datas = append(datas, d)
+	}
+	quickSort(datas)
+	fmt.Println(datas)
 }
 
 func quickSort(a []int) {
@@ -19,14 +36,14 @@ func quickSort(a []int) {
 	pivot := choosePivot(a)
 
 	//patition
-	partition(pivot, a)
+	p := partition(pivot, a)
 
 	//recursively sort
-	if pivot-1 > 0 {
-		quickSort(a[:pivot-1])
+	if p-1 > 0 {
+		quickSort(a[:p])
 	}
-	if pivot+1 < len(a) {
-		quickSort(a[pivot+1:])
+	if p+1 < len(a) {
+		quickSort(a[p+1:])
 	}
 }
 
@@ -34,7 +51,7 @@ func choosePivot(a []int) int {
 	return 0
 }
 
-func partition(pivot int, a []int) {
+func partition(pivot int, a []int) int {
 	//place pivot to the left most
 	p := a[pivot]
 	a[pivot] = a[0]
@@ -51,4 +68,6 @@ func partition(pivot int, a []int) {
 	}
 	a[0] = a[i-1]
 	a[i-1] = p
+
+	return i - 1
 }
