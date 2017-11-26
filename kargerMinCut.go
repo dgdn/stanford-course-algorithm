@@ -1,10 +1,36 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
+	"strconv"
+	"strings"
 	"time"
 )
+
+var edgeStore = make(map[[2]int]int)
+var edgeStoreCount = 0
+
+func saveAndFetchEdge(e1, e2 int) (int, bool) {
+	var max, min int
+	if e1 > e2 {
+		max = e1
+		min = e2
+	} else {
+		max = e2
+		min = e1
+	}
+
+	key := [2]int{min, max}
+	if v, exist := edgeStore[key]; exist {
+		return v, false
+	}
+	edgeStore[key] = edgeStoreCount
+	edgeStoreCount++
+	return edgeStore[key], true
+}
 
 func main() {
 
@@ -14,24 +40,83 @@ func main() {
 	vertice_edges := map[int][]int{}
 	edge_vertices := map[int][2]int{}
 
-	vertices = []int{0, 1, 2, 3}
-	edges = []int{0, 1, 2, 3, 4}
-
-	vertice_edges = map[int][]int{
-		0: {0, 1, 2},
-		1: {1, 3},
-		2: {0, 3, 4},
-		3: {2, 4},
+	f, err := os.Open("kargerMinCut.txt")
+	if err != nil {
+		panic(err)
 	}
-	edge_vertices = map[int][2]int{
-		0: {0, 2},
-		1: {0, 1},
-		2: {0, 3},
-		3: {1, 2},
-		4: {2, 3},
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	var datas [][]int
+	for scanner.Scan() {
+		var nums []int
+		for _, n := range strings.Fields(scanner.Text()) {
+
+			d, err := strconv.Atoi(n)
+			if err != nil {
+				panic(err)
+			}
+			nums = append(nums, d)
+		}
+		datas = append(datas, nums)
+
 	}
 
-	minCut(vertices, edges, vertice_edges, edge_vertices)
+	for _, data := range datas {
+
+		//vertice
+		vertice := data[0]
+		vertices = append(vertices, vertice)
+
+		for i := 1; i < len(data); i++ {
+
+			//add edge
+			edge, isNew := saveAndFetchEdge(vertice, data[i])
+			if isNew {
+				edges = append(edges, edge)
+			}
+
+			//add vertice_edge
+			vertice_edges[vertice] = append(vertice_edges[vertice], edge)
+
+			//add edge_vertices
+			edge_vertices[edge] = [2]int{vertice, data[i]}
+		}
+
+	}
+
+	minCount := 1000
+	for i := 0; i < 1000; i++ {
+		c_vertices := make([]int, len(vertices))
+		copy(c_vertices, vertices)
+		c_edges := make([]int, len(edges))
+		copy(c_edges, edges)
+
+		c_vertice_edges := make(map[int][]int)
+		for k, v := range vertice_edges {
+			_v := []int{}
+			for _, d := range v {
+				_v = append(_v, d)
+			}
+			c_vertice_edges[k] = _v
+		}
+		c_edge_vertices := make(map[int][2]int)
+		for k, v := range edge_vertices {
+			c_edge_vertices[k] = [2]int{v[0], v[1]}
+		}
+
+		//provide clean data on every call
+		length := minCut(c_vertices, c_edges, c_vertice_edges, c_edge_vertices)
+		if length < minCount {
+			minCount = length
+		}
+		if i != 0 && i%100 == 0 {
+			fmt.Println(minCount)
+		}
+	}
+
+	fmt.Println("min cut is", minCount)
+
 }
 
 func minCut(vertices, edges []int, vertice_edges map[int][]int, edge_vertices map[int][2]int) int {
@@ -42,7 +127,6 @@ func minCut(vertices, edges []int, vertice_edges map[int][]int, edge_vertices ma
 		rnd := rand.Intn(len(edges))
 		rand.Seed(time.Now().UTC().UnixNano())
 		edge := edges[rnd]
-		fmt.Println("fuse edge", edge)
 
 		//2.fuse vertice
 		v1, v2 := edge_vertices[edge][0], edge_vertices[edge][1]
@@ -75,29 +159,28 @@ func minCut(vertices, edges []int, vertice_edges map[int][]int, edge_vertices ma
 
 		//3. delete self loop
 
-		for i, e := range edges {
+		for i := 0; i < len(edges); i++ {
+
+			e := edges[i]
 
 			vs := edge_vertices[e]
 			if vs[0] == vs[1] {
 
 				//delete
 				edges = append(edges[:i], edges[i+1:]...)
+				i--
 				delete(edge_vertices, e)
 
 				//remove related vertice_edges
 				vertice_edges[vs[0]] = removeElement(vertice_edges[vs[0]], e)
 
-				break
-
 			}
 
 		}
 
-		fmt.Println(vertices, vertice_edges)
-
 	}
 
-	return len(vertice_edges[0])
+	return len(vertice_edges[vertices[0]])
 }
 
 func removeElement(a []int, n int) []int {
