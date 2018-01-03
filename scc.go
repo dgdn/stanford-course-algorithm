@@ -12,7 +12,7 @@ import (
 
 func main() {
 
-	f, err := os.Open("scc.txt")
+	f, err := os.Open("SCC.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -22,9 +22,11 @@ func main() {
 
 	scc(g)
 
-	fmt.Println(calculateNumComponentNodes(g))
+	results := calculateNumComponentNodes(g)
+	length := len(results)
 
-	fmt.Println(len(calculateNumComponentNodes(g)))
+	fmt.Println(results[length-5:])
+
 }
 
 func testData() io.Reader {
@@ -36,10 +38,12 @@ func testData() io.Reader {
 func printGraph(g *Graph) {
 	for _, v := range g.Vertices {
 		var edges []string
-		for _, i := range v.Edges {
+		for idx, i := range v.Edges {
 			edges = append(edges, fmt.Sprint(i.Tail.Label))
 			edges = append(edges, fmt.Sprint(i.Head.Label))
-			edges = append(edges, ",")
+			if idx != len(v.Edges)-1 {
+				edges = append(edges, ",")
+			}
 		}
 		fmt.Println("node: ", v.Label, edges, "f:", v.FinishTime, "leader:", v.Leader)
 	}
@@ -71,8 +75,6 @@ func calculateNumComponentNodes(g *Graph) []int {
 		}
 	}
 	sort.Ints(invalidLeader)
-	fmt.Println(invalidLeader[:10])
-	fmt.Println("total", len(invalidLeader))
 
 	sort.Ints(leaderNums)
 
@@ -86,9 +88,17 @@ func newGraphReader(reader io.Reader) *Graph {
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 
-		edgeDatas := strings.Split(scanner.Text(), " ")
-		tail, _ := strconv.Atoi(edgeDatas[0])
-		head, _ := strconv.Atoi(edgeDatas[1])
+		edgeDatas := strings.Fields(scanner.Text())
+		tail, err := strconv.Atoi(edgeDatas[0])
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		head, err := strconv.Atoi(edgeDatas[1])
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
 
 		ne := new(Edge)
 
@@ -148,9 +158,8 @@ func scc(g *Graph) {
 	//process the origin graph node in the
 	//decreasing order of rev graph's finishing time
 	nm := make(map[int]*Vertex)
-	for _, v := range g.Vertices {
-		ov := reversedGraph.VerticeMap[v.Label]
-		nm[v.Label] = g.VerticeMap[ov.FinishTime]
+	for _, rv := range reversedGraph.Vertices {
+		nm[rv.FinishTime] = g.VerticeMap[rv.Label]
 	}
 	g.VerticeMap = nm
 
@@ -209,11 +218,6 @@ func DFSLoop(g *Graph) {
 }
 
 func DFS(g *Graph, node *Vertex) {
-	if leader == 1181 {
-		fmt.Println(node.Label)
-		fmt.Println(len(node.Edges))
-	}
-
 	node.Leader = leader
 	node.IsExplored = true
 
