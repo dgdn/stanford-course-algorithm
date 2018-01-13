@@ -54,7 +54,7 @@ func main() {
 
 	sort.Slice(jobs, func(i, j int) bool {
 		if jobs[i].DiffScore == jobs[j].DiffScore {
-			return jobs[i].Weight > jobs[i].Weight
+			return jobs[i].Weight > jobs[j].Weight
 		}
 		return jobs[i].DiffScore > jobs[j].DiffScore
 	})
