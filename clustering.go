@@ -182,7 +182,7 @@ func clustering(g *Graph, k int) []int {
 	})
 
 	unionFind := NewUnionFind()
-	//initialize all vertices to union find data structure
+	//use union find data structure to initialize all vertices
 	//the vertex leader should be itself
 	for _, v := range g.Vertices {
 		v.Leader = v.Label
@@ -198,6 +198,7 @@ func clustering(g *Graph, k int) []int {
 		edgeIdx++
 	}
 
+	//calculate the minimum space of each group
 	mins := map[string]int{}
 	for leader, group := range unionFind.Groups {
 
