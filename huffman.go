@@ -27,16 +27,37 @@ func main() {
 
 	}
 	tree, _ := haffman(heap)
-	iterateTree(tree)
+
+	var minLevel = 100000
+	var maxLevel = 0
+	iterateTreeLevel(tree, 0, &minLevel, &maxLevel)
+
+	//minus 1 represent only count intermedia edge
+	//TODO to figure out why maxLevel should minus 2
+	fmt.Println("min level:", minLevel-1, "\nmax level:", maxLevel-2)
 }
 
-func iterateTree(tree *Tree) {
-	fmt.Println(tree.Label)
+func iterateTreeLevel(tree *Tree, level int, minLevel, maxLevel *int) {
+	level++
 	if tree.Left != nil {
-		iterateTree(tree.Left)
+		iterateTreeLevel(tree.Left, level, minLevel, maxLevel)
+	} else {
+		if level < *minLevel {
+			*minLevel = level
+		}
+		if level > *maxLevel {
+			*maxLevel = level
+		}
 	}
 	if tree.Right != nil {
-		iterateTree(tree.Right)
+		iterateTreeLevel(tree.Right, level, minLevel, maxLevel)
+	} else {
+		if level < *minLevel {
+			*minLevel = level
+		}
+		if level > *maxLevel {
+			*maxLevel = level
+		}
 	}
 }
 
