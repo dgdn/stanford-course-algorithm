@@ -103,41 +103,31 @@ func knapsack_recursive(datas []Object, capacity int, cache map[string]int) (out
 
 	lastIdx := len(datas) - 1
 
-	case1Key := fmt.Sprintf("%d-%d", lastIdx, capacity-datas[lastIdx].Weight)
-	case2Key := fmt.Sprintf("%d-%d", lastIdx, capacity)
+	//case 2 not include the last item
+	case2Value := cache_knapsack_recursive(datas[:lastIdx], capacity, cache)
 
-	var case1Value, case2Value int
-
+	//edge case return case 2 value directly
 	if capacity-datas[lastIdx].Weight < 0 {
-		//edge case
-		if v, ok := cache[case2Key]; ok {
-			case2Value = v
-		} else {
-			case2Value = knapsack_recursive(datas[:lastIdx], capacity, cache)
-			cache[case2Key] = case2Value
-		}
-
-	} else {
-
-		if v, ok := cache[case1Key]; ok {
-			case1Value = v + datas[lastIdx].Value
-		} else {
-			v := knapsack_recursive(datas[:lastIdx], capacity-datas[lastIdx].Weight, cache)
-			cache[case1Key] = v
-			case1Value = v + datas[lastIdx].Value
-		}
-		if v, ok := cache[case2Key]; ok {
-			case2Value = v
-		} else {
-			case2Value = knapsack_recursive(datas[:lastIdx], capacity, cache)
-			cache[case2Key] = case2Value
-		}
+		return case2Value
 	}
 
+	//case 1 include the last item
+	case1Value := cache_knapsack_recursive(datas[:lastIdx], capacity-datas[lastIdx].Weight, cache) + datas[lastIdx].Value
 	if case1Value > case2Value {
 		return case1Value
 	}
 	return case2Value
+}
+
+func cache_knapsack_recursive(datas []Object, capacity int, cache map[string]int) int {
+	lastIdx := len(datas) - 1
+	key := fmt.Sprintf("%d-%d", lastIdx, capacity)
+	if v, ok := cache[key]; ok {
+		return v
+	}
+	v := knapsack_recursive(datas, capacity, cache)
+	cache[key] = v
+	return v
 }
 
 func print2dArray(datas [][]int) {
